@@ -1,9 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request
 from flask_bootstrap import Bootstrap5
 from flask_sqlalchemy import SQLAlchemy
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired
 import requests
 
 app = Flask(__name__)
@@ -24,7 +21,8 @@ class Movie(db.Model):
     review = db.Column(db.String(250), unique=True, nullable=False)
     img_url = db.Column(db.String(250), unique=True, nullable=False)
 
-
+    def __repr__(self):
+        return '<Movie %>' % self.title
 
 
 
@@ -35,4 +33,5 @@ def home():
 
 
 if __name__ == '__main__':
+    db.create_all()
     app.run(debug=True)
