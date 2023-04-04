@@ -2,6 +2,7 @@ from flask import Flask, render_template, redirect, url_for, request
 from flask_bootstrap import Bootstrap5
 from flask_sqlalchemy import SQLAlchemy
 import requests
+from form import Movie_form
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///movies.db"
@@ -30,6 +31,14 @@ class Movie(db.Model):
 @app.route("/")
 def home():
     return render_template("index.html")
+
+
+@app.route("/add", methods=["GET", "POST"])
+def add_movie():
+    movie_form = Movie_form()
+    if movie_form.validate_on_submit():
+        pass
+    return render_template("add.html", movie_form=movie_form)
 
 
 if __name__ == '__main__':
