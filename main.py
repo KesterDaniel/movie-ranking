@@ -3,7 +3,7 @@ from flask_bootstrap import Bootstrap5
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 import requests
-from form import Movie_form
+from form import Movie_form, Edit_movie_form
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///movies.db"
@@ -58,6 +58,14 @@ def add_movie():
         else:
             return redirect(url_for("add_movie"))
     return render_template("add.html", movie_form=movie_form)
+
+
+@app.route("/update", methods=["GET", "POST"])
+def update():
+    edit_form = Edit_movie_form()
+    if edit_form.validate_on_submit():
+        pass
+    return render_template("edit.html", edit_form=edit_form)
 
 
 if __name__ == '__main__':
