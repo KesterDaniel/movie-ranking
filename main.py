@@ -60,12 +60,16 @@ def add_movie():
     return render_template("add.html", movie_form=movie_form)
 
 
-@app.route("/update", methods=["GET", "POST"])
-def update():
+@app.route("/update/<int:movie_id>", methods=["GET", "POST"])
+def update(movie_id):
     edit_form = Edit_movie_form()
+    movie_to_update = Movie.query.filter_by(id=movie_id).first()
     if edit_form.validate_on_submit():
-        pass
-    return render_template("edit.html", edit_form=edit_form)
+        movie_to_update.review = edit_form.review.data
+        movie_to_update.ranking = edit_form.ranking.data
+        db.session.commit()
+        return redirect(url_for("home"))
+    return render_template("edit.html", edit_form=edit_form, movie=movie_to_update)
 
 
 if __name__ == '__main__':
