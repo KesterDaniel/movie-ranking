@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, request
 from flask_bootstrap import Bootstrap5
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
 import requests
 from form import Movie_form
 
@@ -37,7 +38,23 @@ def home():
 def add_movie():
     movie_form = Movie_form()
     if movie_form.validate_on_submit():
-        pass
+        try:
+            new_movie = Movie(
+                title = movie_form.title.data,
+                year = movie_form.year.data,
+                description = movie_form.description.data,
+                rating = movie_form.rating.data,
+                ranking = movie_form.ranking.data,
+                review = movie_form.review.data,
+                img_url = movie_form.img_url.data
+            )
+            db.session.add(new_movie)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            return "Some entries have been saved before. Please add different values"
+        else:
+            return redirect(url_for("add_movie"))
     return render_template("add.html", movie_form=movie_form)
 
 
