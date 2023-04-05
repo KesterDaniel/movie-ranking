@@ -31,7 +31,9 @@ class Movie(db.Model):
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    movies_data = db.session.query(Movie).all()
+    sorted_movies_data = sorted(movies_data, key=lambda x: x.ranking)    
+    return render_template("index.html", movies=sorted_movies_data)
 
 
 @app.route("/add", methods=["GET", "POST"])
