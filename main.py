@@ -78,7 +78,7 @@ def fetch_movie_detail(movie_id):
     )
     db.session.add(new_movie)
     db.session.commit()
-    return redirect(url_for("update"))
+    return redirect(url_for("update", movie_id=new_movie.id))
 
 @app.route("/update/<int:movie_id>", methods=["GET", "POST"])
 def update(movie_id):
@@ -86,7 +86,7 @@ def update(movie_id):
     movie_to_update = Movie.query.filter_by(id=movie_id).first()
     if edit_form.validate_on_submit():
         movie_to_update.review = edit_form.review.data
-        movie_to_update.ranking = edit_form.ranking.data
+        movie_to_update.rating = edit_form.rating.data
         db.session.commit()
         return redirect(url_for("home"))
     return render_template("edit.html", edit_form=edit_form, movie=movie_to_update)

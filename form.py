@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField, FloatField, validators
 from wtforms.validators import DataRequired, URL
+from myvalidators import FloatRange
 
 
 class Movie_form(FlaskForm):
@@ -9,5 +10,5 @@ class Movie_form(FlaskForm):
 
 class Edit_movie_form(FlaskForm):
     review = StringField("Review", validators=[DataRequired()])
-    ranking = IntegerField("Ranking", validators=[DataRequired(), validators.number_range(min=0, max=10)])
+    rating = FloatField("Rating", validators=[DataRequired(), FloatRange(min=0, max=10)])
     update = SubmitField("Update")
