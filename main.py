@@ -36,8 +36,12 @@ class Movie(db.Model):
 
 @app.route("/")
 def home():
-    movies_data = db.session.query(Movie).all()
-    # sorted_movies_data = sorted(movies_data, key=lambda x: x.ranking)    
+    movies_data = db.session.query(Movie).order_by(Movie.rating.asc()).all()
+    ranking_value = len(movies_data)
+    for movie in movies_data:
+        movie.ranking = ranking_value
+        db.session.commit()
+        ranking_value -= 1
     return render_template("index.html", movies=movies_data)
 
 
