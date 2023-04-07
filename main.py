@@ -3,7 +3,12 @@ from flask_bootstrap import Bootstrap5
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 import requests
+from dotenv import load_dotenv
+import os
 from form import Movie_form, Edit_movie_form
+
+load_dotenv()
+MOVIE_API_KEY = os.getenv("MOVIE_API_KEY")
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///movies.db"
@@ -18,9 +23,9 @@ class Movie(db.Model):
     title = db.Column(db.String(250), unique=True, nullable=False)
     year = db.Column(db.Integer, unique=False, nullable=False)
     description = db.Column(db.String(250), unique=True, nullable=False)
-    rating = db.Column(db.Integer, unique=False, nullable=False)
-    ranking = db.Column(db.Integer, unique=True, nullable=False)
-    review = db.Column(db.String(250), unique=True, nullable=False)
+    rating = db.Column(db.Integer, unique=False, nullable=True)
+    ranking = db.Column(db.Integer, unique=True, nullable=True)
+    review = db.Column(db.String(250), unique=True, nullable=True)
     img_url = db.Column(db.String(250), unique=True, nullable=False)
 
     def __repr__(self):
@@ -32,33 +37,48 @@ class Movie(db.Model):
 @app.route("/")
 def home():
     movies_data = db.session.query(Movie).all()
-    sorted_movies_data = sorted(movies_data, key=lambda x: x.ranking)    
-    return render_template("index.html", movies=sorted_movies_data)
+    # sorted_movies_data = sorted(movies_data, key=lambda x: x.ranking)    
+    return render_template("index.html", movies=movies_data)
 
 
 @app.route("/add", methods=["GET", "POST"])
 def add_movie():
     movie_form = Movie_form()
     if movie_form.validate_on_submit():
-        try:
-            new_movie = Movie(
-                title = movie_form.title.data,
-                year = movie_form.year.data,
-                description = movie_form.description.data,
-                rating = movie_form.rating.data,
-                ranking = movie_form.ranking.data,
-                review = movie_form.review.data,
-                img_url = movie_form.img_url.data
-            )
-            db.session.add(new_movie)
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-            return "Some entries have been saved before. Please add different values"
-        else:
-            return redirect(url_for("add_movie"))
+        tmdb_endpoint = "https://api.themoviedb.org/3/search/movie"
+        parameters = {
+            "api_key": "20c10443e1975b73995f026e07da9718",
+            "language": "en-US",
+            "query": movie_form.title.data
+        }
+        response = requests.get(url=tmdb_endpoint, params=parameters)
+        response.raise_for_status()
+        movies_data = response.json()
+        all_movies = movies_data['results']
+        return render_template("select.html", all_movies=all_movies)    
+      
     return render_template("add.html", movie_form=movie_form)
 
+
+@app.route("/fetch_movie/<movie_id>")
+def fetch_movie_detail(movie_id):
+    parameters = {
+            "api_key": "20c10443e1975b73995f026e07da9718",
+            "language": "en-US",
+        }
+    response = requests.get(url=f"https://api.themoviedb.org/3/movie/{movie_id}", params=parameters)
+    response.raise_for_status()
+    movie_details = response.json()
+    print(movie_details)
+    new_movie = Movie(
+        title = movie_details["original_title"],
+        year = movie_details["release_date"].split("-")[0],
+        description = movie_details["overview"],
+        img_url = f"https://www.themoviedb.org/t/p/original/{movie_details['poster_path']}"
+    )
+    db.session.add(new_movie)
+    db.session.commit()
+    return redirect(url_for("update"))
 
 @app.route("/update/<int:movie_id>", methods=["GET", "POST"])
 def update(movie_id):
