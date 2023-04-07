@@ -51,7 +51,7 @@ def add_movie():
     if movie_form.validate_on_submit():
         tmdb_endpoint = "https://api.themoviedb.org/3/search/movie"
         parameters = {
-            "api_key": "20c10443e1975b73995f026e07da9718",
+            "api_key": MOVIE_API_KEY,
             "language": "en-US",
             "query": movie_form.title.data
         }
@@ -67,7 +67,7 @@ def add_movie():
 @app.route("/fetch_movie/<movie_id>")
 def fetch_movie_detail(movie_id):
     parameters = {
-            "api_key": "20c10443e1975b73995f026e07da9718",
+            "api_key": MOVIE_API_KEY,
             "language": "en-US",
         }
     response = requests.get(url=f"https://api.themoviedb.org/3/movie/{movie_id}", params=parameters)
